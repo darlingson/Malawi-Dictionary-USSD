@@ -1,0 +1,11 @@
+# Dependency directories
+node_modules/
+
+# Compiled JavaScript files
+/dist/
+
+# Environment variables file
+.env
+
+# Visual Studio Code specific files
+.vscode/
