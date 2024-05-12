@@ -8,7 +8,7 @@
     "esModuleInterop": true,                // Enable module interop support
     "skipLibCheck": true,                   // Skip type checking of all declaration files
     "forceConsistentCasingInFileNames": true,
-    "types": ["node", "express", "express-session", "./types/smpp.d.ts"],
+    "types": ["node", "express", "express-session", "./types/smpp.d.ts","./types/ussd.d.ts"],
   },
   "include": ["**/*.ts"],                   // Include all TypeScript files in the project
   "exclude": ["node_modules", "dist"]       // Exclude node_modules and dist directories

@@ -1,20 +1,30 @@
-import EventEmitter from 'events';
-const eventEmitter = new EventEmitter();
+import smpp from 'smpp';
 
-const dictionary = {
-    english: {
-        "hello": 'A common greeting',
-        "world": 'The earth, together with all of its countries, peoples, and natural features'
-    },
-    chichewa: {
-        "muli": 'You are',
-        "ndili bwino": 'I am fine'
+const session = smpp.connect({
+    url: 'smpp://your_smpp_server_address:port',
+});
+
+session.on('connect', () => {
+    console.log('Connected to SMPP server');
+});
+
+session.on('error', (error) => {
+    console.error('SMPP session error:', error);
+});
+
+session.on('close', () => {
+    console.log('Connection to SMPP server closed');
+});
+
+session.on('pdu', (pdu) => {
+    if (pdu.command === 'deliver_sm') {
+        const sessionId = pdu.source_addr;
+        const ussdRequest = pdu.short_message.message.toString('utf-8').trim();
+        handleUssdRequest(sessionId, ussdRequest);
     }
-};
+});
 
-const sessions = {};
-
-eventEmitter.on('ussdRequest', (sessionId, input) => {
+function handleUssdRequest(sessionId: string | number, input: string) {
     if (!sessions[sessionId]) {
         sessions[sessionId] = { state: 'languageSelection' };
     }
@@ -32,9 +42,9 @@ eventEmitter.on('ussdRequest', (sessionId, input) => {
             sendUssdResponse(sessionId, 'Invalid state. Please try again.');
             break;
     }
-});
+}
 
-function handleLanguageSelection(sessionId, input) {
+function handleLanguageSelection(sessionId: string | number, input: string) {
     const selectedLanguage = input.trim().toLowerCase();
     if (dictionary[selectedLanguage]) {
         sessions[sessionId].selectedLanguage = selectedLanguage;
@@ -45,18 +55,59 @@ function handleLanguageSelection(sessionId, input) {
     }
 }
 
-function handleWordInput(sessionId, input) {
+function handleWordInput(sessionId: string | number, input: string) {
     const word = input.trim().toLowerCase();
-    const { selectedLanguage } = sessions[sessionId];
-    const meaning = dictionary[selectedLanguage][word];
-    if (meaning) {
-        sendUssdResponse(sessionId, `Meaning of "${word}" in ${selectedLanguage}: ${meaning}`);
+    const selectedLanguage = sessions[sessionId]?.selectedLanguage;
+    const languageDictionary = dictionary[selectedLanguage as keyof typeof dictionary];
+
+    if (languageDictionary) {
+        const meaning = languageDictionary[word];
+        if (meaning) {
+            sendUssdResponse(sessionId, `Meaning of "${word}" in ${selectedLanguage}: ${meaning}`);
+        } else {
+            sendUssdResponse(sessionId, `Word "${word}" not found in ${selectedLanguage}. Please try another word:`);
+        }
     } else {
-        sendUssdResponse(sessionId, `Word "${word}" not found in ${selectedLanguage}. Please try another word:`);
+        sendUssdResponse(sessionId, `Selected language "${selectedLanguage}" is invalid.`);
     }
 }
 
-function sendUssdResponse(sessionId, message) {
+function sendUssdResponse(sessionId: any, message: string) {
     console.log(`Sending USSD response to session ${sessionId}: ${message}`);
+    session.deliver_sm({
+        source_addr: 'your_source_address',
+        destination_addr: sessionId,
+        short_message: {
+            message: message,
+            udh: undefined,
+        },
+    }, (responsePdu: { command_status: number; }) => {
+        console.log('USSD response sent:', responsePdu.command_status === 0 ? 'Success' : 'Failed');
+    });
 }
 
+
+const dictionary: Dictionary = {
+    english: {
+        "hello": 'A common greeting',
+        "world": 'The earth, together with all of its countries, peoples, and natural features'
+    },
+    chichewa: {
+        "muli": 'You are',
+        "ndili bwino": 'I am fine',
+        "muli bwanji": "a greeting, asking a person how they are doing",
+    }
+};
+interface Session {
+    state: string;
+    selectedLanguage?: string;
+}
+interface LanguageDictionary {
+    [word: string]: string;
+}
+
+interface Dictionary {
+    [language: string]: LanguageDictionary;
+}
+
+const sessions: { [sessionId: string]: Session } = {};
