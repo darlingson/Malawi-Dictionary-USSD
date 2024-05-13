@@ -19,5 +19,8 @@
     ],
     "ext": "ts",
     "exec": "ts-node ./src/app.ts"
+  },
+  "scripts": {
+    "start": "nodemon"
   }
 }

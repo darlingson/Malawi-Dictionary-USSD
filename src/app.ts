@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import session from 'express-session';
+import Dictionary from './interfaces/dictionary';
 
 const app = express();
 const port = 3000;
@@ -13,7 +14,7 @@ app.use(session({
 }));
 
 // A simple dictionary object for demonstration purposes
-const dictionary = {
+const dictionary: Dictionary = {
     en: { hello: "A greeting used when meeting someone." },
     fr: { bonjour: "Salutation utilisée lors d'une rencontre." },
     es: { hola: "Un saludo utilizado al conocer gente." }
@@ -47,7 +48,7 @@ app.post('/ussd', (req: Request, res: Response) => {
             break;
         case 2:
             const lang = sess.data.language || 'en';
-            const word = dictionary[lang][text.toLowerCase()];
+            const word = dictionary[lang as keyof typeof dictionary][text.toLowerCase()];
             response = `END Meaning: ${word || 'Word not found.'}`;
             break;
         default:
