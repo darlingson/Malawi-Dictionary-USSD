@@ -1,19 +1,26 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import session from 'express-session';
+import session, { Session } from 'express-session';
 import Dictionary from './interfaces/dictionary';
+import { InteractionMap } from './interfaces/interaction';
+
+interface CustomSession extends Session {
+    data?: any;
+}
 
 const app = express();
 const port = 3000;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(session({
-    secret: 'yourSecretKey',
+    secret: 'darlingson',
     resave: false,
     saveUninitialized: true
 }));
-
-// A simple dictionary object for demonstration purposes
+let interactions: InteractionMap = {};
+function generateInteractionId(): string {
+    return Math.random().toString(36).substr(2, 9);
+}
 const dictionary: Dictionary = {
     en: { hello: "A greeting used when meeting someone." },
     fr: { bonjour: "Salutation utilisée lors d'une rencontre." },
@@ -21,42 +28,17 @@ const dictionary: Dictionary = {
 };
 
 app.post('/ussd', (req: Request, res: Response) => {
-    const { sessionId, serviceCode, phoneNumber, text } = req.body;
-    let sess = req.session;
+    let { interaction_id } = req.body;
 
-    if (!sess.data) {
-        sess.data = { level: 0 };
+    if (!interaction_id) {
+        interaction_id = generateInteractionId();
+        interactions[interaction_id] = {
+            interaction_level: "0",
+            start_time: new Date().toISOString()
+        };
     }
-
-    let response = '';
-    
-    switch (sess.data.level) {
-        case 0:
-            response = 'CON Choose a language:\n1. English\n2. French\n3. Spanish';
-            sess.data.level = 1;
-            break;
-        case 1:
-            if (text === '1') {
-                sess.data.language = 'en';
-            } else if (text === '2') {
-                sess.data.language = 'fr';
-            } else if (text === '3') {
-                sess.data.language = 'es';
-            }
-            response = 'CON Enter a word:';
-            sess.data.level = 2;
-            break;
-        case 2:
-            const lang = sess.data.language || 'en';
-            const word = dictionary[lang as keyof typeof dictionary][text.toLowerCase()];
-            response = `END Meaning: ${word || 'Word not found.'}`;
-            break;
-        default:
-            response = 'END Invalid option.';
-    }
-
-    res.set('Content-Type', 'text/plain');
-    res.send(response);
+    console.log(interaction_id);
+    res.send(`Interaction ID: ${interaction_id}`);
 });
 
 app.listen(port, () => {
