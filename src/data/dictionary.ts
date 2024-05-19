@@ -1,0 +1,53 @@
+import Dictionary from "../interfaces/dictionary";
+
+const dictionary: Dictionary = {
+    ch: {
+
+    },
+    lm: {
+        "waka": "mine",
+        "epewe": "rudeness",
+        "mino": "water jars",
+        "muwono": "arm",
+        "muno": "water jar",
+        "mukhwaaka": "my friend",
+        "oveetha": "to winnow",
+        "mwiinyu": "salt",
+        "moowe": "mother",
+        "kuukuru": "owl",
+        "weella": "to be clear",
+        "miino": "tooth",
+        "othonya": "to drip",
+        "othoonya": "to point out",
+        "otulla": "to cut grass",
+        "otuulla": "to make a hole",
+        "o’aba":"to bathe",
+        "o’abela":"to swim",
+        "o’ada":"to harvest",
+        "o’ala":"to remain",
+        "o’ara":"to follow"
+    },
+    tk: {
+        "Pachoko": "small",
+        "Chikulu ": "big",
+        "chiwisi": "fresh",
+        "Chasono": "new",
+        "Chakale": "old",
+        "Chakutowa": "beautiful",
+        "Chakofya": "dangerous",
+        "Pachokopachoko": "slowly",
+        "Mwaluwiro": "fast",
+        "Chifipa": "black",
+        "Chituwa": "white",
+        "Biriwiri": "green",
+        "Chotu": "grey",
+        "Uswesi": "red",
+        "Khofi": "pink",
+        "Pachanya pa": "on top of",
+        "pasi": "at the bottom of",
+        "pawalo": "outside",
+        "pakati": "in the middle of",
+        "pathanzi": "in front",
+        "Pakwamba": "first",
+    },
+};
