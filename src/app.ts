@@ -28,17 +28,26 @@ const dictionary: Dictionary = {
 };
 
 app.post('/ussd', (req: Request, res: Response) => {
-    let { interaction_id } = req.body;
+    let { interactionId: interactionId } = req.body;
 
-    if (!interaction_id) {
-        interaction_id = generateInteractionId();
-        interactions[interaction_id] = {
+    if (!interactionId) {
+        console.log('No interaction_id provided');
+        interactionId = generateInteractionId();
+        interactions[interactionId] = {
             interaction_level: "0",
             start_time: new Date().toISOString()
         };
     }
-    console.log(interaction_id);
-    res.send(`Interaction ID: ${interaction_id}`);
+    switch (interactions[interactionId].interaction_level) {
+        case "0":
+            //the response should be both the message and the interaction_id
+            res.send({
+                message: "Hello, Choose a language to continue/n 1. English/ 2. French/ 3. Spanish",
+                interactionId: interactionId
+            })
+            interactions[interactionId].interaction_level = "1";
+            break;
+    }
 });
 
 app.listen(port, () => {
